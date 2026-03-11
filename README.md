@@ -2,6 +2,8 @@
 
 Notebooks from the AWS workshop: **Customizing SLMs for email phishing with Amazon SageMaker AI**.
 
+**Updated for SageMaker Python SDK v3** - Uses modular architecture with `sagemaker-train`, `sagemaker-serve`, and `sagemaker-core`.
+
 ## Technical Architecture
 
 ### Model: Qwen2.5-1.5B
@@ -9,7 +11,7 @@ Notebooks from the AWS workshop: **Customizing SLMs for email phishing with Amaz
 - **Task**: Binary sequence classification (Safe vs. Phishing)
 - **Fine-tuning**: RSLoRA (rank-stabilized LoRA) on classification head
 - **Precision**: bfloat16 mixed precision
-- **Training**: ~60-75 minutes on ml.g5.xlarge
+- **Training**: ~60-75 minutes on `ml.g5.2xlarge`
 
 ### Dataset: `drorrabin/phishing_emails-data`
 - **Size**: ~27k training samples, ~3.7k test samples
@@ -20,9 +22,8 @@ Notebooks from the AWS workshop: **Customizing SLMs for email phishing with Amaz
 ### Deployment: SageMaker + vLLM
 - **Container**: LMI v18 with vLLM 0.12.0
 - **Inference**: Text classification mode (single token prediction)
-- **Instance**: `ml.g5.xlarge` (1x NVIDIA A10G, 24GB VRAM)
+- **Instance**: `ml.g6.4xlarge` (1x NVIDIA L4 Tensor Core, 24GB GPU memory)
 - **Routing**: Least Outstanding Requests for load balancing
-
 
 
 ## Repository Structure
@@ -43,5 +44,7 @@ The notebooks are designed to run sequentially, with state passed via IPython's 
 
 1. **01_data_processing.ipynb** → Stores: `train_s3_uri`, `val_s3_uri`, `test_s3_uri`, `NUM_LABELS`
 2. **02_model_training.ipynb** → Stores: `model_s3_uri`, `training_job_name`, `mlflow_experiment_name`
+   - Uses SageMaker SDK v3 `ModelTrainer` with structured config objects (`Compute`, `SourceCode`, `InputData`)
 3. **03_model_deployment.ipynb** → Stores: `endpoint_name`, `model_name`
+   - Uses SageMaker SDK v3 `Model.create()` and `Endpoint.create()` from `sagemaker-core`
 4. **04_benchmarking.ipynb** → Uses stored endpoint info for testing
